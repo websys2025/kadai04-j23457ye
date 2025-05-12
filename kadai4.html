@@ -34,9 +34,11 @@
                 // 商品一覧の表示関数
                 static showItemList(list) {
                     console.log("商品は以下の" + Item.number + "種類です。");
-
                     // 配列の内容を項目毎に出力
                     // 課題4-1. ここにコードを書く
+                    list.forEach(item=>{
+                        console.log(`商品番号:${item.id},商品名:${item.name},金額:${item.price},在庫数:${item.stock}`);
+                    });
                     console.log(""); // 空行の出力
                 }
                 
@@ -63,7 +65,8 @@
 
             // 課題4-1. ここにコード書く
             // 商品オブジェクトの生成
-
+            const item_list=items.map(item=>new Item(item.name, item.price, item.stock));
+            
             // 課題4-2. ここにコードを書く
             // 商品表の作成
 
@@ -111,3 +114,4 @@ id: 8, name: 紅茶, 140円, 残り6個
 残りは0個です。
 炭酸水は商品の在庫がないため購入できません。
 -->
+
