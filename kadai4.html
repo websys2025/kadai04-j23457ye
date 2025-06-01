@@ -3,11 +3,60 @@
     <head>
         <meta charset="utf-8">
         <title>演習課題4：自動販売機（クラス）</title>
-    </head>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+            }
+            #wallet {
+                font-size: 18px;
+                font-weight: bold;
+                margin: 10px 0;
+                padding: 10px;
+                background-color: #e8f5e8;
+                border: 2px solid #4CAF50;
+                border-radius: 5px;
+                display: inline-block;
+            }
+            table {
+                border-collapse: collapse;
+                margin: 20px 0;
+                width: 100%;
+                max-width: 600px;
+            }
+            th, td {
+                border: 1px solid #333;
+                padding: 10px;
+                text-align: center;
+            }
+            th {
+                background-color: #f0f0f0;
+                font-weight: bold;
+            }
+            button {
+                padding: 5px 10px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+            }
+            button:hover {
+                background-color: #0056b3;
+            }
+            button:disabled {
+                background-color: #ccc;
+                cursor: not-allowed;
+            }
+        </style>
     <body>
         <h1 id="vending-machine">自動販売機システム</h1>
+        <div id="wallet">所持金: <span id="money">1000</span>円</div>
         <table id="item_area" border="1"></table>
         <script>
+            // 所持金の変数
+            let wallet = 1000;
+            
             // 商品一覧を記録する連想配列の配列
             const items =  [
                 { id: 1, name: "緑茶", price: 140, stock: 5 },
@@ -19,7 +68,6 @@
                 { id: 7, name: "コーヒー", price: 170, stock: 8 },
                 { id: 8, name: "紅茶", price: 140, stock: 6 }
             ]
-
             // 商品用のクラス定義
             class Item {
                 static number = 1;
@@ -30,56 +78,84 @@
                     this.stock = stock;
                     Item.number++;
                 }
-
                 // 商品一覧の表示関数
                 static showItemList(list) {
                     console.log("商品は以下の" + Item.number + "種類です。");
                     // 配列の内容を項目毎に出力
                     // 課題4-1. ここにコードを書く
-                    list.forEach(item=>{
-                        console.log(`商品番号:${item.id},商品名:${item.name},金額:${item.price},在庫数:${item.stock}`);
+                    list.forEach(item => {
+                        console.log(`商品番号: ${item.id}, 商品名: ${item.name}, 金額: ${item.price}, 在庫数: ${item.stock}`);
                     });
                     console.log(""); // 空行の出力
                 }
                 
                 // 商品購入の関数
                 buyItem() {          
-                    if (this.stock >= 1) { 
-                        console.log("商品番号: "+this.id+", 商品名: "+this.name+"を購入します。");
+                    if (this.stock >= 1 && wallet >= this.price) { 
+                        console.log("商品番号: "+this.id+", 商品名: "+this.name+"を購入しました。");
                         // 課題4-2. ここにコードを書く
                         // 購入による商品の在庫削減処理
+                        this.stock--;
+                        wallet -= this.price;
+                        console.log("残金は" + wallet + "円です。");
+                        console.log("残りは" + this.stock + "個です。");
                         
                         // 課題4-3. ここにコードを書く
                         // 在庫用のエレメントを抽出し、HTML内の個数を更新
-                    } else console.log(this.name+"は商品の在庫がないため購入できません。");
+                        const stockElement = document.getElementById("stock" + this.id);
+                        stockElement.textContent = this.stock;
+                        
+                        // 所持金の表示を更新
+                        document.getElementById("money").textContent = wallet;
+                    } else if (this.stock < 1) {
+                        console.log(this.name+"は商品の在庫がないため購入できません。");
+                    } else {
+                        console.log(this.name+"は所持金が不足しているため購入できません。");
+                    }
                 }
             } // End of Item class
-
             // 商品テーブルのエレメント抽出
             const itemArea = document.getElementById("item_area");
             itemArea.innerHTML += "<tr><th>商品名</th><th>金額</th><th>在庫数</th><th>購入</th></tr>";
-
             // 配列のオブジェクト作成
             const item_list = new Array(items.length);
             const btn = new Array(items.length);
-
             // 課題4-1. ここにコード書く
             // 商品オブジェクトの生成
-            const item_list=items.map(item=>new Item(item.name, item.price, item.stock));
+            for (let i = 0; i < items.length; i++) {
+                item_list[i] = new Item(items[i].name, items[i].price, items[i].stock);
+            }
             
             // 課題4-2. ここにコードを書く
             // 商品表の作成
-
             // クリックイベント時の購入処理の設定
+            for (let i = 0; i < item_list.length; i++) {
+                const row = itemArea.insertRow();
+                
+                const nameCell = row.insertCell();
+                nameCell.textContent = item_list[i].name;
+                
+                const priceCell = row.insertCell();
+                priceCell.textContent = item_list[i].price + "円";
+                
+                const stockCell = row.insertCell();
+                stockCell.innerHTML = `<span id="stock${item_list[i].id}">${item_list[i].stock}</span>個`;
+                
+                const buttonCell = row.insertCell();
+                const button = document.createElement("button");
+                button.id = "button" + item_list[i].id;
+                button.textContent = "購入";
+                buttonCell.appendChild(button);
+            }
+            
             for (let i=0; i<item_list.length; i++) {
                 // 課題4-3. ここにコードを書く
                 // 課題4-1, 4-2のコードが完成したら、以下のコメントを外す
-                //document.getElementById("button"+item_list[i].id).onclick = () => {
-                //    item_list[i].buyItem();
-                //}
+                document.getElementById("button"+item_list[i].id).onclick = () => {
+                    item_list[i].buyItem();
+                }
             }
             Item.showItemList(item_list);
-
         </script>
     </body>
 </html>
